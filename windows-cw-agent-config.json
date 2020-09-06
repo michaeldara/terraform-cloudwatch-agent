@@ -1,0 +1,218 @@
+{
+  "agent": {
+    "metrics_collection_interval": 180,
+    "region": "us-east-1",
+    "run_as_user": "cwagent",
+    "logfile": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log"
+  },
+  "metrics": {
+    "namespace": "application-name",
+    "metrics_collected": {
+      "Processor": {
+        "metrics_collection_interval": 180,
+        "measurement": [
+          {
+            "name": "% Idle Time",
+            "rename": "CPU_IDLE",
+            "unit": "Percent"
+          },
+          "% Interrupt Time",
+          "% User Time",
+          "% Processor Time"
+        ],
+        "resources": [
+          "*"
+        ],
+        "append_dimensions": {
+          "customized_dimension_key_1": "customized_dimension_value_1",
+          "customized_dimension_key_2": "customized_dimension_value_2"
+        }
+      },
+      "LogicalDisk": {
+        "metrics_collection_interval": 180,
+        "measurement": [
+          {
+            "name": "% Idle Time",
+            "unit": "Percent"
+          },
+          {
+            "name": "% Disk Read Time",
+            "rename": "DISK_READ"
+          },
+          "% Disk Write Time"
+        ],
+        "resources": [
+          "*"
+        ]
+      },
+      "customizedObjectName": {
+        "metrics_collection_interval": 180,
+        "measurement": [
+          "metric1",
+          "metric2"
+        ],
+        "resources": [
+          "customizedInstaces"
+        ]
+      },
+      "Memory": {
+        "metrics_collection_interval": 180,
+        "measurement": [
+          "Available Bytes",
+          "Cache Faults/sec",
+          "Page Faults/sec",
+          "Pages/sec"
+        ]
+      },
+      "Network Interface": {
+        "metrics_collection_interval": 180,
+        "measurement": [
+          "Bytes Received/sec",
+          "Bytes Sent/sec",
+          "Packets Received/sec",
+          "Packets Sent/sec"
+        ],
+        "resources": [
+          "*"
+        ],
+        "append_dimensions": {
+          "customized_dimension_key_3": "customized_dimension_value_3"
+        }
+      },
+      "System": {
+        "measurement": [
+          "Context Switches/sec",
+          "System Calls/sec",
+          "Processor Queue Length"
+        ]
+      }
+    },
+    "append_dimensions": {
+      "ImageId": "${aws:ImageId}",
+      "InstanceId": "${aws:InstanceId}",
+      "InstanceType": "${aws:InstanceType}",
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}"
+    },
+    "aggregation_dimensions": [
+      [
+        "ImageId"
+      ],
+      [
+        "InstanceId",
+        "InstanceType"
+      ],
+      [
+        "d1"
+      ],
+      []
+    ]
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
+            "log_group_name": "{env}/windows/amazon-cloudwatch-agent",
+            "log_stream_name": "{local_hostname}-{instance_id}-amazon-cloudwatch-agent",
+            "timezone": "UTC"
+          }
+        ]
+      },
+      "windows_events": {
+        "collect_list": [
+          {
+            "event_name": "Application",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/winapp",
+            "log_stream_name": "{local_hostname}-{instance_id}-winapp",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "System",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/system",
+            "log_stream_name": "{local_hostname}-{instance_id}-system",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Security",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/securityaudit",
+            "log_stream_name": "{local_hostname}-{instance_id}-securityaudit",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Microsoft-Windows-PowerShell/Operational",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/powershell",
+            "log_stream_name": "{local_hostname}-{instance_id}-powershell",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Microsoft-Windows-Windows Defender/Operational",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/defender",
+            "log_stream_name": "{local_hostname}-{instance_id}-defender",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Microsoft-Windows-SMBServer/Operational",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/smbserveroperational",
+            "log_stream_name": "{local_hostname}-{instance_id}-smbserveroperational",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Microsoft-Windows-Bits-Client/Operational",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/bitsclient",
+            "log_stream_name": "{local_hostname}-{instance_id}-bitsclient",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Microsoft-Windows-TaskScheduler/Maintenance",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/taskscheduler",
+            "log_stream_name": "{local_hostname}-{instance_id}-taskscheduler",
+            "event_format": "xml"
+          },
+          {
+            "event_name": "Microsoft-Windows-WMI-Activity/Operational",
+            "event_levels": [
+              "INFORMATION",
+              "ERROR"
+            ],
+            "log_group_name": "{env}/windows/wmiactivity",
+            "log_stream_name": "{local_hostname}-{instance_id}-wmiactivity",
+            "event_format": "xml"
+          }
+        ]
+      }
+    }
+  }
+}
