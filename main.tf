@@ -26,13 +26,13 @@ resource "null_resource" "install_agent" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/conf/logs_config.json"
+    source      = "${path.module}/linuxcw-cw-agent-config.json"
     destination = "/tmp/logs_config.json"
   }
 
 
   provisioner "file" {
-    source      = "${path.module}/install-unified-cw-agent.sh"
+    source      = "${path.module}/linux-cw-agent-install.sh"
     destination = "/tmp/install-unified-cw-agent.sh"
   }
 
