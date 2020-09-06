@@ -1,0 +1,143 @@
+# Project: terraform-unified-cw-agent-installer
+#author: Michael Dara
+
+Terraform module to install  the new AWS unified cloud watch agent on a an
+existing ec2 instance
+
+NOTE: All the test samples in this code are working versions and tested against
+the SANDBOX environment. IF you want to test against other environments, you's
+have to change the ownwer_id, vpc, subnets in the test files.
+
+-----------------------------------------------------------------------------------
+1) DETAILS OF IMPLEMENTATION:
+----------------------------------------------------------------------------------
+The module folder contains the actual unified cloudwatch agent implementation.
+The test folder contains an example of calling the module while creating an
+EC2 instance
+
+/test/ec2-with-unified-cw-agent/main.tf contains code on how to call the unified
+cloudwatch agent module
+
+/test/ec2-with-unified-cw-agent/iam.tf contains the roles and policies that
+need to be attached to The Ec2 instance in order to access cloudwatch agent.
+
+test/ec2-with-unified-cw-agent/conf folder has 3 files
+in the locals.tf, change the file name that you want to use accordingly.
+logs_config.json : use this file if you want to add only application / system
+log configurations.
+
+metrics_config.json : use this file if you want to only enable metrics on your
+EC2 instance.
+
+logs_with_metrics_config.json: use this file if you want to add both the logs
+configuration as well as metrics configuration to your EC2 instance.
+
+NOTE: Your ec2 instance must have access to the internet through IGW or NAT (if it is
+in a private subnet) because the events to the cloudwatch agent vpc endpoints are
+published over the internet.
+
+------------------------------------------------------------------------------------------
+2) HOW to CHECKOUT AND USE THE MODULE
+-----------------------------------------------------------------------------------------
+clone the project with the below url:
+>git clone https://gitlab.pheaacloud.org/devops/terraform-modules/terraform-unified-cw-agent-installer.git
+
+create your branch:
+>git checkout mybranch
+
+---------------------------------------------------------------------------------------
+3) TO CREATE AN IMAGE WITH UNFIED CLOUDWATCH AGENT SCRIPT USING PACKER
+---------------------------------------------------------------------------------------
+navigate to /terraform-unified-cw-agent-installer/packer folder
+
+edit the build_image_with_cw_agent.json to add your preferred subnets/vpcid's etc.
+
+edit the script path in the provisioner section to point to the
+/terraform-unified-cw-agent-installer/module/install-unified-cw-agent.sh
+
+validate the packer script
+>packer validate build_image_with_cw_agent.json
+
+build the image
+>packer build -var 'aws_access_key=your access key' \
+   -var 'aws_secret_key=your secret key' build_image_with_cw_agent.json
+
+if the build is successful, you can see the image in the AWS console under EC2->AMIs
+
+-----------------------------------------------------------------------------------------
+4) USE THE CLOUDWATCH AGENT MODULE IN YOUR TERRAFORM PROJECT
+------------------------------------------------------------------------------------------
+navigate to /terraform-unified-cw-agent-installer/test folder
+edit the locals.tf file to add the ami created above with packer
+
+>terraform init
+>terraform plan
+>terraform apply
+
+First time you do terraform apply, a new EC2 instance will be created and
+unified cloud watch agent is installed along with your logs or metric config
+files that you have chosen.
+
+You should see an EC2 instance in the AWS console: mdara-cw-metrics
+You should see the below log groups under the cloudwatch->log groups
+
+mdara_amazon-cloudwatch-agent-logs-and-metrics.log
+mdara-cwagent-logs_and_metrics-new.log
+
+you should see your custom metrics under the namespace "mdara" under
+the cloud watch agent.
+
+---------------------------------------------------------------------------------------------
+5) UPLOADING CHANGES TO YOUR LOGS AND METRICS:
+----------------------------------------------------------------------------------------------
+Subsequently, when you need to modify your log or metric configuration files,
+you do not have to destroy your EC2 instance but just upload your new logs and
+metrics configurations to the existing EC2 instance. by issuing following
+commands from /terraform-unified-cw-agent-installer/test folder
+
+change your config files under /conf folder
+remove current cloudwatch agent module state with the below command.
+>teraform state rm module.cloudwatch_agent
+>terraform plan
+>terraform apply
+
+You'll see in the plan logs that the EC2 instance will not be recreated again
+but only cloudwatch agent module will be recreated. Also, sincce the cloudwatch
+agent is already installed on the EC2 instance, the implemented script will
+skip the installation and only upload the new logs and metrics files and
+restart the cloudwatch agent.
+
+After the second run, you should see your existing EC2 instance not terminated
+and recreated in the AWS console: mdara-cw-metrics
+You should see the new log groups under the cloudwatch->log groups if you have
+added or modified existing log groups and new metrics if you have added any.
+
+You should see your modified or newly added custom metrics under the name space
+"mdara" under the cloudwatch. Use your namespace as your application name
+eg: DARBI and always use the same namespace for all runs.
+
+
+--------------------------------------------------------------------------------
+7. CLOUDWATCH ALARMS AND NOTIFICATIONS
+-------------------------------------------------------------------------------
+Cloudwatch alarms and notifications are implemented in the 
+/terraform-unified-cw-agent-installer/alarms.tf file There are 2 types of alarms
+ of Alarms implemented. 
+
+  1.CPU Alarms - This alarm is triggered when within a span of 5 minutes the CPU 
+    spikes is greater than or  equal to 80%. This number can be edited in the '
+    locals.tf of the caller application as per your requirement
+
+  2. Memory Alarms - This alarm is triggered when within a span of 5 minutes,
+     the Memory spike is greater than equal to 80%. This number can be edited
+     in the locals.tf file caller application.
+
+When any of the above alarms are triggered, you'll see the relevant alarm on the
+AWS Cloudwatch Dashboard.
+
+Also, a notification with the alarm details will be sent out through the SQS to
+the email configured in the locals.tf of the caller application.
+
+Example implementation for the caller application is provided under the
+examples/ec2-with-unified-cw-agent folder.
+
